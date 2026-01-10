@@ -1,0 +1,10 @@
+import clifford as cf 
+
+layout, blades = cf.Cl(3)
+
+print(blades)
+
+e1 = blades['e1']
+
+print(e1)
+
