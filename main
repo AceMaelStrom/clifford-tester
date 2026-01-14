@@ -1,10 +1,87 @@
+#------------------------
+import math
+#------------------------
 import clifford as cf 
-
+from clifford import g4,general_exp
+#------------------------
+import numpy as np
+from numpy import e,pi
+#------------------------
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import cm
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
+#------------------------
 layout, blades = cf.Cl(3)
 
-print(blades)
+#defines basis 
+locals().update(blades)
 
-e1 = blades['e1']
+v1 = e1
 
-print(e1)
+vecA = e1*e3
+
+setrange = 10
+
+rotors = []
+xset = []
+yset = []
+zset = []
+
+n = 3
+
+def coordinatefun(vtrs):
+    return float(vtrs|e1), float(vtrs|e2), float(vtrs|e3)
+
+for i in range(setrange + 1):
+    #make new rotor with new n
+    
+    R = math.cos(pi/n) - (vecA*math.sin(pi/n))
+    
+    n = n + 1
+    
+    vecB = R*v1*~R
+    rotors.append(vecB)
+    x,y,z = coordinatefun(vecB)
+    xset.append(x * i/3)
+    yset.append(y * i/3)
+    zset.append(z * i/3)
+
+print(rotors)
+
+
+x1, y1, z1 = coordinatefun(v1)
+
+#start graph
+fig = plt.figure()
+ax= fig.add_subplot(111, projection="3d")
+
+ax.quiver(0,0,0, x1, y1, z1, color="green", label = 'v', arrow_length_ratio=0.2)
+
+for i in range(len(xset)): 
+    colors = cm.hsv(i/setrange)
+    ax.quiver(0,0,0, xset[i], yset[i], zset[i], color=colors, label = ( 'v'+ str(i) + 'prime'), arrow_length_ratio=0.2)
+    
+pointarray = np.array
+
+linegradient = Line3DCollection(setrange, color = colors)
+
+ax.add_collection3d(linegradient)
+
+
+#the line
+ax.plot(xset, yset, zset)
+
+
+max_range = 3
+ax.set_xlim([-max_range, max_range])
+ax.set_ylim([-max_range, max_range])
+ax.set_zlim([-max_range, max_range])
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_title('rotor in plane e13')
+ax.legend()
+plt.show()
+
 
