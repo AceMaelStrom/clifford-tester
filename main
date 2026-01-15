@@ -16,35 +16,36 @@ layout, blades = cf.Cl(3)
 #defines basis 
 locals().update(blades)
 
-v1 = e1
+v1 = e1 +0.7*e2 + 1.5*e3
 
-vecA = e1*e3
+biplane = [e12,e23,e13]
 
-setrange = 10
+setrange = 7
 
 rotors = []
-xset = []
-yset = []
-zset = []
+xset, yset, zset = [], [], []
 
-n = 3
+n = 1
 
 def coordinatefun(vtrs):
     return float(vtrs|e1), float(vtrs|e2), float(vtrs|e3)
 
-for i in range(setrange + 1):
-    #make new rotor with new n
-    
-    R = math.cos(pi/n) - (vecA*math.sin(pi/n))
-    
-    n = n + 1
-    
-    vecB = R*v1*~R
-    rotors.append(vecB)
-    x,y,z = coordinatefun(vecB)
-    xset.append(x * i/3)
-    yset.append(y * i/3)
-    zset.append(z * i/3)
+for b in biplane:
+    bhat = b/ abs(b)
+    n = 3
+    for i in range(setrange + 1):
+        
+        #make new rotor with new n
+        R = math.cos(pi/n) - (bhat*math.sin(pi/n))
+        
+        n = n + 1
+        
+        vecB = R*v1*~R
+        rotors.append(vecB)
+        x,y,z = coordinatefun(vecB)
+        xset.append(x)
+        yset.append(y)
+        zset.append(z)
 
 print(rotors)
 
@@ -59,11 +60,15 @@ ax.quiver(0,0,0, x1, y1, z1, color="green", label = 'v', arrow_length_ratio=0.2)
 
 for i in range(len(xset)): 
     colors = cm.hsv(i/setrange)
-    ax.quiver(0,0,0, xset[i], yset[i], zset[i], color=colors, label = ( 'v'+ str(i) + 'prime'), arrow_length_ratio=0.2)
+    ax.quiver(0,0,0, xset[i], yset[i], zset[i], color=(0,0,0,0), label = ( 'v'+ str(i) + 'prime'), arrow_length_ratio=0.2)
     
-pointarray = np.array
+    
+pointarray = np.array(list(zip(xset, yset, zset)))
+segments = np.array([[pointarray[i], pointarray[i+1]] for i in range(len(pointarray)-1)])
+colors = [cm.hsv(i/(len(segments))) for i in range(len(segments))]
 
-linegradient = Line3DCollection(setrange, color = colors)
+
+linegradient = Line3DCollection(segments, color = colors)
 
 ax.add_collection3d(linegradient)
 
@@ -80,7 +85,7 @@ ax.set_zlim([-max_range, max_range])
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-ax.set_title('rotor in plane e13')
+ax.set_title('rotor in plane e12,e23,e13')
 ax.legend()
 plt.show()
 
